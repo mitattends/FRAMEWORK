@@ -5,9 +5,17 @@
 package etu1988.framework.servlet;
 
 import etu1988.framework.Mapping;
+import etu1988.framework.myAnnotation.MethodAnnotation;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +26,8 @@ import javax.servlet.http.HttpServletResponse;
  * @author mita
  */
 public class FrontServlet extends HttpServlet {
-    HashMap<String, Mapping> mappingUrls ;
+    HashMap<String, Mapping> mappingUrl;
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -30,28 +39,59 @@ public class FrontServlet extends HttpServlet {
      */
     
     
-    public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
-        this.mappingUrls = mappingUrls;
+    public void setMappingUrl(HashMap<String, Mapping> mappingUrl) {
+        this.mappingUrl = mappingUrl;
     }
 
-    public HashMap<String, Mapping> getMappingUrls() {
-        return mappingUrls;
+    public HashMap<String, Mapping> getMappingUrl() {
+        return mappingUrl;
     }
+    
+    public String formatFilePath(File file){
+        String className =  file.getAbsolutePath().replace(Thread.currentThread().getContextClassLoader().getResource(".").getFile(), "");
+        className = className.replace(".class", "");
+        className = className.replace("/", ".");
+        return className;
+    }
+    
+    public void checkMethodAnnotation(Class classToChecked){
+        for (Method method : classToChecked.getDeclaredMethods()) {
+            if(method.isAnnotationPresent(MethodAnnotation.class)){
+                String url = method.getAnnotation(MethodAnnotation.class).url();
+                mappingUrl.put(url, new Mapping(classToChecked.getName(), method.getName()));
+            }
+        }
+    }
+    
+    public void fillMappingUrl(File file) throws ClassNotFoundException{
+        for(File fileUnderFile : file.listFiles()){
+            if(fileUnderFile.isFile()){
+                String className = formatFilePath(fileUnderFile);
+                Class classTemp = Class.forName(className);
+                checkMethodAnnotation(classTemp);
+            }
+            else fillMappingUrl(fileUnderFile);
+        }
+    }
+    
+    
+    @Override
+    public void init() throws ServletException {
+        mappingUrl = new HashMap<>();
+        try {
+            fillMappingUrl(new File(Thread.currentThread().getContextClassLoader().getResource(".").getPath()));
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet NewServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet NewServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        PrintWriter out = response.getWriter();
+        for (Map.Entry<String, Mapping> entry : mappingUrl.entrySet()) {
+            Object val = entry.getValue();
+            System.out.println(val);
         }
     }
 
