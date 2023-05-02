@@ -33,4 +33,6 @@ public class Mapping {
         setMethod(method);
     }
     
+    public Mapping(){}
+    
 }

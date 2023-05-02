@@ -33,6 +33,16 @@ public class Emp {
     public ModelView callMe(){
         ModelView mv = new ModelView();
         mv.setView("testView.jsp");
+        Emp[]emps = {new Emp("Jean"), new Emp("Jeanne")};
+        mv.addItem("empList", emps);
+        return mv;
+    }
+    
+    @MethodAnnotation(url = "empSave")
+    public ModelView save(){
+        ModelView mv = new ModelView();
+        mv.setView("formEmp.jsp");
+        System.out.println(this.getNom());
         return mv;
     }
 }

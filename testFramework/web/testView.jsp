@@ -3,7 +3,11 @@
     Created on : 18 avr. 2023, 15:24:05
     Author     : mitantsoa
 --%>
-
+<%@page import="dataObject.Emp"%>
+<%
+    Object obj = request.getAttribute("empList");
+    Emp[]emps = (Emp[])obj;
+%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -12,6 +16,10 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <%
+            for (Emp emp : emps) {
+                    out.println(emp.getNom());
+            }
+        %>
     </body>
 </html>

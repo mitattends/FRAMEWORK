@@ -12,7 +12,8 @@ import java.util.HashMap;
  */
 public class ModelView {
     String view ;
-
+    HashMap<String, Object> data ;
+    
     public String getView() {
         return view;
     }
@@ -21,6 +22,21 @@ public class ModelView {
         this.view = view;
     }
 
+    public void setData(HashMap<String, Object> data) {
+        this.data = data;
+    }
+
+    public HashMap<String, Object> getData() {
+        return data;
+    }
+    
+    public ModelView(){
+        data = new HashMap<>();
+    }
+    
+    public void addItem(String key, Object value){
+        data.put(key, value);
+    }
     
     
     
