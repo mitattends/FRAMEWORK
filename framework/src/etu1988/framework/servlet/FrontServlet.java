@@ -156,11 +156,31 @@ public class FrontServlet extends HttpServlet {
         }
     }
     
+    public void executeAction(HttpServletRequest req, HttpServletResponse resp){
+        if(!req.getServletPath().equals("/")){
+            Mapping mappingUsed = findMapping(req);
+            String objectName = mappingUsed.getClassName();
+            String methodName = mappingUsed.getMethod();
+            Class classCalled = null;
+            Object classCalledInstance = null;
+            try {
+                classCalled = Class.forName(objectName);
+                classCalledInstance = classCalled.newInstance(); 
+                useSet(classCalledInstance, req); //get all the attributes and set them
+                Method methodCalled = classCalledInstance.getClass().getDeclaredMethod(methodName);
+                ModelView modelView = (ModelView) methodCalled.invoke(classCalledInstance);
+                if(modelView.getData() != null) fillAttributes(modelView.getData(), req);
+                req.getRequestDispatcher(modelView.getView()).forward(req, resp);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
     
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 //        PrintWriter out = response.getWriter()
-        redirectView(request, response);
+        executeAction(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
