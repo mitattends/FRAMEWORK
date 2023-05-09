@@ -1,0 +1,34 @@
+Envoyer l'url avec un argument via get
+appeller la fonction correspondant a cet url avec l'argument
+
+Remarque:
+-evitez les fonctions ayant le meme nom et memes nom d'arguments mais avec des types d'arguments differents
+-les arguments doivent etre en ordre dans l'url
+
+fonction findArguments(httpRequest)
+	-after? = prendre les chaines de caracteres apres le '?'
+	-listArguments = after?.split(&)
+	return listArguments fin  
+
+fonction checkArguments(listArguments, fonction)
+	listArgumentsInFonction = fonction.arguments
+	faire une boucle de listArgumentsInFonction 
+		faire une boucle de listArguments 
+			si argument.nom != argumentInFonction.nom
+				return false
+	return true
+
+
+fonction executeAction
+	nomFonction
+	nomsArguments
+	typeArgument
+	-faire une boucle de toutes les fonction declarees
+		-si une fonction.nom == nomFonction
+			listArguments = fonction.arguments
+			si checkArguments(listArguments, fonction)
+				appeler fonction
+			c
+			
+			
+			
