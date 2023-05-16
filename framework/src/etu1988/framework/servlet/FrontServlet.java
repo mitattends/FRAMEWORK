@@ -9,6 +9,7 @@ import etu1988.framework.Mapping;
 import etu1988.framework.myAnnotation.MethodAnnotation;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,19 +19,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import java.sql.Date;
+import java.util.Vector;
 /**
  *
  * @author mita
  */
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingUrls;
-    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -96,84 +96,77 @@ public class FrontServlet extends HttpServlet {
         String strCapitalized = mot.substring(0, 1).toUpperCase() + mot.substring(1);
         return strCapitalized;
     }
+    
         
     public void useSet(Object object, HttpServletRequest req) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
         Enumeration<String> attributeNames = req.getParameterNames();
         while(attributeNames.hasMoreElements()){
             String attributeName = attributeNames.nextElement();
             Field field = object.getClass().getDeclaredField(attributeName); 
+            String attributeValue = req.getParameter(attributeName);
+            String methodName = "set"+makeFirstCharUp(attributeName);
+            Class fieldType = field.getType();
+            Method setMethod = object.getClass().getDeclaredMethod(methodName, fieldType);
             if(field.getType().equals(int.class)){
-                int attributeValue = Integer.parseInt(req.getParameter(attributeName));
-                if(field != null){
-                    Method setMethod = object.getClass().getDeclaredMethod("set"+makeFirstCharUp(field.getName()), field.getType());
-                    setMethod.invoke(object, attributeValue);
-                }
+                int attribute = Integer.parseInt(attributeValue);
+                setMethod.invoke(object, attribute);
             }
             if(field.getType().equals(double.class)){
-                double attributeValue = Double.parseDouble(req.getParameter(attributeName));
-                if(field != null){
-                    Method setMethod = object.getClass().getDeclaredMethod("set"+makeFirstCharUp(field.getName()), field.getType());
-                    setMethod.invoke(object, attributeValue);
-                }
+                double attribute = Double.parseDouble(attributeValue);
+                setMethod.invoke(object, attribute);
             }
             if(field.getType().equals(float.class)){
-                float attributeValue = Float.parseFloat(req.getParameter(attributeName));
-                if(field != null){
-                    Method setMethod = object.getClass().getDeclaredMethod("set"+makeFirstCharUp(field.getName()), field.getType());
-                    setMethod.invoke(object, attributeValue);
-                }
+                float attribute = Float.parseFloat(attributeValue);
+                setMethod.invoke(object, attribute);
             }
-            if(field.getType().equals()){
-                int attributeValue = Integer.parseInt(req.getParameter(attributeName));
-                if(field != null){
-                    Method setMethod = object.getClass().getDeclaredMethod("set"+makeFirstCharUp(field.getName()), field.getType());
-                    setMethod.invoke(object, attributeValue);
-                }
+            if(field.getType().equals(String.class)){
+                String attribute = attributeValue;
+                setMethod.invoke(object, attribute);
             }
-           
-            
-            
+            if(field.getType().equals(Date.class)){
+                Date attribute = Date.valueOf(attributeValue);
+                setMethod.invoke(object, attribute);
+            }
         }
     }
     
-    public Object[] checkAttributes(Parameter[]params, HttpServletRequest req){
-        Enumeration<String>parametersNames = req.getParameterNames();
-        int paramsLen = params.length;
-        int index = 0;
-        Class[]paramsClasses= new Class[paramsLen];
-        Object[]paramsValues = new Object[paramsLen];
-        Object[] all = new Object[2];
-        while(parametersNames.hasMoreElements()){
-            String paramName = parametersNames.nextElement();
-            if(paramName.equals(params[index].getName())){
-                paramsClasses[index] = params[index].getType();
-                paramsValues[index] = (params[index].getType())req.getParameter(paramName);
-                index++;
-            }
-            if(paramsClasses.length == paramsLen) {
-                
-            }
-        }
-        return null;
-    }
+    /*
+        prendre le nom de la fonction via l'url
+        chercher le nom de la fonction dans la liste des fonctions du modele
+        si il y un match 
+            prendre les parametres de cette fonction 
+            prendre les parametres du servletRequest
+            si paramFonction[0].nom = paramServle[0].nom
+                si paramFonction[0].type = paramServlet[0].type
+                    paramsUsed.add(paramFonction[0])
+            si paramFonction[1].nom = paramServle[0].nom
+                si paramFonction[0].type = paramServlet[0].type
+                    paramsUsed.add(paramFonction[0])
+                    
+    */
     
-    public Method findMethod(Object object ,String fonctionName, HttpServletRequest req) throws NoSuchMethodException{
-        Method[] methods = object.getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (method.getName().equals(fonctionName)) {
-                Parameter[]parameters = method.getParameters();
-                if (parameters != null){
-                    HashMap<Class[], Object[]> paramsValues = checkAttributes(parameters, req);
-                    return object.getClass().getDeclaredMethod(fonctionName, paramsValues.get());
+    
+    public Method findMethod(HttpServletRequest req, Object model, String methodName) throws NoSuchMethodException, SecurityException{
+        Method[] modelMethods = model.getClass().getDeclaredMethods();
+        Enumeration<String>paramsEnumeration = req.getParameterNames();
+        for (Method modelMethod : modelMethods) {
+            if(modelMethod.getName().equals(methodName)){
+                Parameter[]methodParameters = modelMethod.getParameters();
+                Class[]parameterTypes = new Class[methodParameters.length];
+                int i = 0;
+                for (Parameter methodParameter : methodParameters) {
+                    if(methodParameter.getName().equals(req.getParameter(methodParameter.getName()))){
+                        Array.set(parameterTypes, i, methodParameter.getType());
+                        i++;
+                    }
                 }
-                return object.getClass().getDeclaredMethod(fonctionName);
+                return model.getClass().getDeclaredMethod(methodName,parameterTypes) ;
             }
         }
         return null;
     }
     
     
-   
     @Override
     public void init() throws ServletException {
         mappingUrls = new HashMap<>();
@@ -195,7 +188,7 @@ public class FrontServlet extends HttpServlet {
                 classCalled = Class.forName(objectName);
                 classCalledInstance = classCalled.newInstance(); 
                 useSet(classCalledInstance, req); //get all the attributes and set them
-                Method methodCalled = findMethod(classCalledInstance, methodName, req);
+                Method methodCalled = classCalledInstance.getClass().getDeclaredMethod(methodName);
                 ModelView modelView = (ModelView) methodCalled.invoke(classCalledInstance);
                 if(modelView.getData() != null) fillAttributes(modelView.getData(), req);
                 req.getRequestDispatcher(modelView.getView()).forward(req, resp);
@@ -205,16 +198,8 @@ public class FrontServlet extends HttpServlet {
         }
     }
     
-    
-    
-    
-    
-    
-    
-    
-
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        PrintWriter out = response.getWriter()
+//        PrintWriter out = response.getWriter();
         executeAction(request, response);
     }
 
