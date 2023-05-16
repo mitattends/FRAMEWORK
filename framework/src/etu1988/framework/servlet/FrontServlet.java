@@ -148,7 +148,6 @@ public class FrontServlet extends HttpServlet {
     
     public Method findMethod(HttpServletRequest req, Object model, String methodName) throws NoSuchMethodException, SecurityException{
         Method[] modelMethods = model.getClass().getDeclaredMethods();
-        Enumeration<String>paramsEnumeration = req.getParameterNames();
         for (Method modelMethod : modelMethods) {
             if(modelMethod.getName().equals(methodName)){
                 Parameter[]methodParameters = modelMethod.getParameters();
