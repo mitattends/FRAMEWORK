@@ -42,7 +42,18 @@ public class Emp {
     public ModelView save(){
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
-        System.out.println(this.getNom());
+        System.out.println("nom "+this.getNom());
         return mv;
     }
+    
+    
+    @MethodAnnotation(url = "empSave?id=45")
+    public ModelView save(int id){
+        ModelView mv = new ModelView();
+        mv.setView("formEmp.jsp");
+        System.out.println("id "+id);
+        return mv;
+    }
+    
+    
 }
