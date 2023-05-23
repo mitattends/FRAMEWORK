@@ -7,10 +7,10 @@ package etu1988.framework.servlet;
 import etu1988.ModelView;
 import etu1988.framework.Mapping;
 import etu1988.framework.myAnnotation.MethodAnnotation;
-import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Date;
+import java.util.Arrays;
+import java.util.Vector;
+import javax.servlet.GenericServlet;
 /**
  *
  * @author mita
@@ -108,9 +111,26 @@ public class FrontServlet extends HttpServlet {
             return arguments;
         }
         return null;
-        
     }
     
+    public Object[] fillArrayElements(HttpServletRequest req, Field field){
+        int count = 0;
+        String fieldArrayName = field.getName()+"["+count+"]";
+        Vector<Object>fieldValues_V = new Vector<>();
+        while(req.getParameter(fieldArrayName)!=null){
+            fieldValues_V.add(req.getParameter(fieldArrayName));
+            count++;
+        }
+        Object[]fieldValues_A = fieldValues_V.toArray();
+        return fieldValues_A;
+    }
+    
+    public void useSetForArray(HttpServletRequest req,Object object, Field field, Method setMethod, String attributeValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+        if(field.getType().equals(String[].class)){
+            String[]attribute = (String[])fillArrayElements(req, field);
+            setMethod.invoke(object, attribute);
+        }
+    }
         
     public void useSet(Object object, HttpServletRequest req) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
         Enumeration<String> attributeNames = req.getParameterNames();
@@ -146,6 +166,7 @@ public class FrontServlet extends HttpServlet {
                 Date attribute = Date.valueOf(attributeValue);
                 setMethod.invoke(object, attribute);
             }
+            useSetForArray(req, object, field, setMethod, attributeValue);
         }
     }
     

@@ -13,7 +13,7 @@ import java.util.Arrays;
  * @author mitantsoa
  */
 public class Parent {
-    String[]childsName;
+    String[]childsName = new String[3];
     FileUpload familyPicture;
 
     public String[] getChildsName() {

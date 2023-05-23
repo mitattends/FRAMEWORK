@@ -15,16 +15,13 @@
         <h1>Hello World!</h1>
         <form action="#" method="post">
             <p>
-                <input type="checkbox" id="choix1" name="choix[]" value="riche">
-                <label for="choix1">riche</label>
-                <input type="checkbox" id="choix2" name="choix[]" value="pauvre">
-                <label for="choix2">pauvre</label>
-                <input type="checkbox" id="choix3" name="choix[]" value="moyen">
-                <label for="choix3">moyen</label>
+                <input type ="text" name="childsName[]" placeholder="premierNom">
+                <input type ="text" name="childsName[]" placeholder="deuxiemeNom">
+                <input type ="text" name="childsName[]" placeholder="troisiemeNom">
             </p>
             <p>
                 <label for="upload">choisissez votre photo</label>
-                <input type="file" id="upload" accept="image/png,image/jpeg">
+                <input type="file" id="upload" accept="image/png,image/jpeg" name="familyPicture">
             </p>
             <p>
                 <input type="submit" value="valider">
