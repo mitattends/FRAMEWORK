@@ -38,11 +38,13 @@ public class Emp {
         return mv;
     }
     
-    @MethodAnnotation(url = "empSave")
-    public ModelView save(){
+    @MethodAnnotation(url = "empX")
+    public ModelView save(int id){
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
-        System.out.println(this.getNom());
+        System.out.println("id "+id);
         return mv;
     }
+    
+    
 }
