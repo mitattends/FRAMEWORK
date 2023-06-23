@@ -276,7 +276,7 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
-    public Object fillClassInstances(Class classToChecked) throws InstantiationException, IllegalAccessException {
+    public Object AddInClassInstances(Class classToChecked) throws InstantiationException, IllegalAccessException {
         if (classeInstances.containsKey(classToChecked.getName())) {
             if (classeInstances.get(classToChecked.getName()) == null) {
                 classeInstances.replace(classToChecked.getName(), classToChecked.newInstance());
@@ -285,6 +285,7 @@ public class FrontServlet extends HttpServlet {
         }
         return classToChecked.newInstance();
     }
+    
 
     public void executeAction(HttpServletRequest req, HttpServletResponse resp) {
         if (!req.getServletPath().equals("/")) {
@@ -294,7 +295,7 @@ public class FrontServlet extends HttpServlet {
             Object classCalledInstance = null;
             try {
                 classCalled = Class.forName(objectName);
-                classCalledInstance = fillClassInstances(classCalled);
+                classCalledInstance = AddInClassInstances(classCalled);
                 useSet(classCalledInstance, req); //get all the attributes and set them
                 Method methodCalled = findMethod(req, classCalledInstance);
                 Object[] argsValues = findArgsValues(methodCalled, req);

@@ -5,10 +5,9 @@
 
 package dataObject;
 
-import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.myAnnotation.MethodAnnotation;
-import java.io.File;
+import etu1988.framework.myAnnotation.Scope;
 
 /**
  *
@@ -40,14 +39,14 @@ public class Emp {
         return mv;
     }
     
+    @Scope(profil = "admin")
     @MethodAnnotation(url = "empSave")
     public ModelView save(){
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
-        System.out.println("nom "+this.getNom());
+        System.out.println("vous etes admin");
         return mv;
     }
-    
     
     @MethodAnnotation(url = "empSave")
     public ModelView save(int id){
