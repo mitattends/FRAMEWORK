@@ -13,7 +13,7 @@
     </head>
     <body>
         <h1>Hello World!</h1>
-        <form method="post" action = "empSave?id=4">
+        <form method="post" action = "empSave">
             <input type="text" name="nom" placeholder="nom">
             <input type="submit" value="valider"> 
         </form>

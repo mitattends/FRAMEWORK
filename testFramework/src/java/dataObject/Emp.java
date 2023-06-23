@@ -5,8 +5,10 @@
 
 package dataObject;
 
+import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.myAnnotation.MethodAnnotation;
+import java.io.File;
 
 /**
  *
@@ -47,13 +49,32 @@ public class Emp {
     }
     
     
-    @MethodAnnotation(url = "empSave?id=45")
+    @MethodAnnotation(url = "empSave")
     public ModelView save(int id){
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
         System.out.println("id "+id);
         return mv;
     }
+    
+    @MethodAnnotation(url = "empSave")
+    public ModelView save(String nom){
+        ModelView mv = new ModelView();
+        mv.setView("formEmp.jsp");
+        System.out.println("nom+++"+nom);
+        return mv;
+    }
+    
+    @MethodAnnotation(url = "showArray")
+    public ModelView show(int[]noms){
+        ModelView mv = new ModelView();
+        mv.setView("formArray.jsp");
+        for(int nom : noms){
+            System.out.println(nom);
+        }
+        return mv;
+    }
+    
     
     
 }
