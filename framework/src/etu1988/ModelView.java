@@ -41,6 +41,7 @@ public class ModelView {
     
     public ModelView(){
         data = new HashMap<>();
+        sessions = new HashMap<>();
     }
     
     public void addItem(String key, Object value){

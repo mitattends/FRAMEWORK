@@ -15,6 +15,7 @@
         <form action="login">
             <input type="text" name="userName">
             <input type="password" name="password">
+            <input type="submit" value="valider">
         </form>
     </body>
 </html>
