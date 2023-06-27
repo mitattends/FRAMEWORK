@@ -30,12 +30,23 @@ public class Emp {
     
     public Emp(){}
     
+    @Scope(profil = "user")
     @MethodAnnotation(url = "appelMoi")
     public ModelView callMe(){
         ModelView mv = new ModelView();
         mv.setView("testView.jsp");
         Emp[]emps = {new Emp("Jean"), new Emp("Jeanne")};
         mv.addItem("empList", emps);
+        System.out.println("vous etes un utilisateur normal");
+        return mv;
+    }
+    
+    @Scope(profil = "")
+    @MethodAnnotation(url = "callMe")
+    public ModelView callMe2(){
+        ModelView mv = new ModelView();
+        mv.setView("formEmp.jsp");
+        System.out.println("vous etes un visiteur");
         return mv;
     }
     

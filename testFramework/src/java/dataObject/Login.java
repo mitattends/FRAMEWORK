@@ -5,6 +5,7 @@
 package dataObject;
 
 import etu1988.ModelView;
+import etu1988.framework.myAnnotation.MethodAnnotation;
 
 /**
  *
@@ -29,17 +30,19 @@ public class Login {
         this.password = password;
     }
     
+    @MethodAnnotation(url = "login")
     public ModelView login(){
         ModelView mv = new ModelView();
-        if(userName.equals("mitantsoa") && password.equals("123")){
-            
+        mv.setView("formEmp.jsp");
+        if(getUserName().equals("Mitantsoa") && getPassword().equals("123")){
+            mv.addSessions("isConnected", true);
+            mv.addSessions("profil","admin");
         }
-        
-            
-        
-    }
-        
-        return mv;
+        else {
+            mv.addSessions("isConnected", true);
+            mv.addSessions("profil", "user");
+        }
+        return mv; 
     }
     
     

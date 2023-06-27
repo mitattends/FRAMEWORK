@@ -4,7 +4,6 @@
  */
 package etu1988.framework.servlet;
 
-import com.sun.source.tree.BreakTree;
 import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.Mapping;
@@ -38,6 +37,7 @@ public class FrontServlet extends HttpServlet {
 
     HashMap<String, Mapping> mappingUrls;
     HashMap<String, Object> classeInstances;
+    HashMap<String, Object> sessions;
     Vector<FileUpload> fileUploads;
 
     /**
@@ -64,7 +64,7 @@ public class FrontServlet extends HttpServlet {
     public void setClasseInstances(HashMap<String, Object> classeInstances) {
         this.classeInstances = classeInstances;
     }
-
+    
     public String formatFilePath(File file) {
         String className = file.getAbsolutePath().replace(Thread.currentThread().getContextClassLoader().getResource(".").getFile(), "");
         className = className.replace(".class", "");
@@ -269,8 +269,10 @@ public class FrontServlet extends HttpServlet {
     public void init() throws ServletException {
         mappingUrls = new HashMap<>();
         classeInstances = new HashMap<>();
+        sessions = new HashMap<>();
         try {
             fillMappingUrl(new File(Thread.currentThread().getContextClassLoader().getResource(".").getPath()));
+            
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -286,7 +288,12 @@ public class FrontServlet extends HttpServlet {
         return classToChecked.newInstance();
     }
     
-
+    public void fillSessions(HttpServletRequest req, HashMap<String,Object>sessionsFromDataObject){
+        for (Map.Entry<String, Object> entry : sessionsFromDataObject.entrySet()) {
+            req.getSession().setAttribute(entry.getKey(), entry.getValue());
+        }
+    }
+    
     public void executeAction(HttpServletRequest req, HttpServletResponse resp) {
         if (!req.getServletPath().equals("/")) {
             Mapping mappingUsed = findMapping(req);
@@ -304,11 +311,17 @@ public class FrontServlet extends HttpServlet {
                 if (argsValues.length == 0) {
                     modelView = (ModelView) methodCalled.invoke(classCalledInstance);
                 }
+                
                 modelView = (ModelView) methodCalled.invoke(classCalledInstance, argsValues);
 
                 if (modelView.getData() != null) {
                     fillAttributes(modelView.getData(), req);
                 }
+                
+                if(!modelView.getSessions().isEmpty()){
+                    fillSessions(req, modelView.getSessions());
+                }
+                
                 req.getRequestDispatcher(modelView.getView()).forward(req, resp);
             } catch (Exception e) {
                 e.printStackTrace();
