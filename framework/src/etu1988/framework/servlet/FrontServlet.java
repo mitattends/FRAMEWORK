@@ -8,6 +8,7 @@ import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.Mapping;
 import etu1988.framework.myAnnotation.MethodAnnotation;
+import etu1988.framework.myAnnotation.Scope;
 import etu1988.framework.myAnnotation.Singleton;
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.Vector;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletConfig;
 
 /**
  *
@@ -37,7 +40,7 @@ public class FrontServlet extends HttpServlet {
 
     HashMap<String, Mapping> mappingUrls;
     HashMap<String, Object> classeInstances;
-    HashMap<String, Object> sessions;
+    HashMap<String, Object> sessions; //pour contenir les variables de sessions contenues dans init
     Vector<FileUpload> fileUploads;
 
     /**
@@ -49,8 +52,8 @@ public class FrontServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    public void setMappingUrl(HashMap<String, Mapping> mappingUrl) {
-        this.mappingUrls = mappingUrl;
+    public void setMappingUrl() {
+        this.mappingUrls = new HashMap<>();
     }
 
     public HashMap<String, Mapping> getMappingUrl() {
@@ -61,10 +64,18 @@ public class FrontServlet extends HttpServlet {
         return classeInstances;
     }
 
-    public void setClasseInstances(HashMap<String, Object> classeInstances) {
-        this.classeInstances = classeInstances;
+    public void setClasseInstances() {
+        this.classeInstances = new HashMap<>();
     }
-    
+
+    public HashMap<String, Object> getSessions() {
+        return sessions;
+    }
+
+    public void setSessions() {
+        this.sessions = new HashMap<>();
+    }
+
     public String formatFilePath(File file) {
         String className = file.getAbsolutePath().replace(Thread.currentThread().getContextClassLoader().getResource(".").getFile(), "");
         className = className.replace(".class", "");
@@ -78,12 +89,6 @@ public class FrontServlet extends HttpServlet {
                 String url = method.getAnnotation(MethodAnnotation.class).url();
                 mappingUrls.put(url, new Mapping(classToChecked.getName(), method.getName()));
             }
-        }
-    }
-
-    public void checkSingleton(Class classToChecked) {
-        if (classToChecked.isAnnotationPresent(Singleton.class)) {
-            classeInstances.put(classToChecked.getName(), null);
         }
     }
 
@@ -265,16 +270,9 @@ public class FrontServlet extends HttpServlet {
 
     }
 
-    @Override
-    public void init() throws ServletException {
-        mappingUrls = new HashMap<>();
-        classeInstances = new HashMap<>();
-        sessions = new HashMap<>();
-        try {
-            fillMappingUrl(new File(Thread.currentThread().getContextClassLoader().getResource(".").getPath()));
-            
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
+    public void checkSingleton(Class classToChecked) {
+        if (classToChecked.isAnnotationPresent(Singleton.class)) {
+            classeInstances.put(classToChecked.getName(), null);
         }
     }
 
@@ -287,13 +285,54 @@ public class FrontServlet extends HttpServlet {
         }
         return classToChecked.newInstance();
     }
-    
-    public void fillSessions(HttpServletRequest req, HashMap<String,Object>sessionsFromDataObject){
+
+    public void fillSessions(HttpServletRequest req, HashMap<String, Object> sessionsFromDataObject) {
         for (Map.Entry<String, Object> entry : sessionsFromDataObject.entrySet()) {
-            req.getSession().setAttribute(entry.getKey(), entry.getValue());
+            if (sessions.containsValue(entry.getKey())) {
+                req.getSession().setAttribute(entry.getKey(), entry.getValue());
+            }
         }
     }
     
+    public void checkAuthorisation(Method m, HttpServletRequest req) throws Exception{
+        if(m.isAnnotationPresent(Scope.class)){
+            int hierarchieForMethod = m.getAnnotation(Scope.class).hierarchie();
+            String sessionProfilName = (String) sessions.get("sessionValue");
+            int userProfilHierarchie = (int) req.getSession().getAttribute(sessionProfilName);
+            if(hierarchieForMethod > userProfilHierarchie){
+                String exceptionMessage = "Cette méthode ne peut etre appellée par vous ";
+                String exceptionExplanation = "vous : "+userProfilHierarchie+" --- la fonction requiert : "+ hierarchieForMethod;
+                throw new Exception(exceptionMessage + "------" + exceptionExplanation);
+            }
+        }
+    }
+
+    /*
+        Fonction a appeler pour le demarrage 
+        de la servlet
+     */
+    @Override
+    public void init() throws ServletException {
+        setMappingUrl();
+        setClasseInstances();
+        setSessions();
+        try {
+            fillMappingUrl(new File(Thread.currentThread().getContextClassLoader().getResource(".").getPath()));
+            /*
+                getIniParameter et getIniParameterNames ne peuvent etre accessibles que dans init
+             */
+            // ------------- remplissage de session ------------- 
+            Enumeration initParamaterNames = getInitParameterNames();
+            while (initParamaterNames.hasMoreElements()) {
+                String initParamaterName = (String) initParamaterNames.nextElement();
+                String initParameterValue = (String) getInitParameter(initParamaterName);
+                sessions.put(initParamaterName, initParameterValue);
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void executeAction(HttpServletRequest req, HttpServletResponse resp) {
         if (!req.getServletPath().equals("/")) {
             Mapping mappingUsed = findMapping(req);
@@ -304,24 +343,27 @@ public class FrontServlet extends HttpServlet {
                 classCalled = Class.forName(objectName);
                 classCalledInstance = AddInClassInstances(classCalled);
                 useSet(classCalledInstance, req); //get all the attributes and set them
+                // --------check pour la fonction trouvée----------
                 Method methodCalled = findMethod(req, classCalledInstance);
+                checkAuthorisation(methodCalled, req);
+                // --------fin du check--------------
                 Object[] argsValues = findArgsValues(methodCalled, req);
                 ModelView modelView = new ModelView();
 
                 if (argsValues.length == 0) {
                     modelView = (ModelView) methodCalled.invoke(classCalledInstance);
                 }
-                
+
                 modelView = (ModelView) methodCalled.invoke(classCalledInstance, argsValues);
 
                 if (modelView.getData() != null) {
                     fillAttributes(modelView.getData(), req);
                 }
-                
-                if(!modelView.getSessions().isEmpty()){
+
+                if (!modelView.getSessions().isEmpty()) {
                     fillSessions(req, modelView.getSessions());
                 }
-                
+
                 req.getRequestDispatcher(modelView.getView()).forward(req, resp);
             } catch (Exception e) {
                 e.printStackTrace();

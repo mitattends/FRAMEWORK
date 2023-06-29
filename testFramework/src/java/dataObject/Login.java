@@ -6,6 +6,7 @@ package dataObject;
 
 import etu1988.ModelView;
 import etu1988.framework.myAnnotation.MethodAnnotation;
+import java.util.HashMap;
 
 /**
  *
@@ -36,11 +37,16 @@ public class Login {
         mv.setView("formEmp.jsp");
         if(getUserName().equals("Mitantsoa") && getPassword().equals("123")){
             mv.addSessions("isConnected", true);
-            mv.addSessions("profil","admin");
+            mv.addSessions("profil",21);
+            int x = 5;
+        }
+        else if(getUserName().equals("Mitantsoa") && getPassword().equals("mita")){
+            mv.addSessions("isConnected", true);
+            mv.addSessions("profil", 11);
         }
         else {
             mv.addSessions("isConnected", true);
-            mv.addSessions("profil", "user");
+            mv.addSessions("profil", 1);
         }
         return mv; 
     }

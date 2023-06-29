@@ -8,6 +8,7 @@ package dataObject;
 import etu1988.ModelView;
 import etu1988.framework.myAnnotation.MethodAnnotation;
 import etu1988.framework.myAnnotation.Scope;
+import java.util.HashMap;
 
 /**
  *
@@ -30,7 +31,7 @@ public class Emp {
     
     public Emp(){}
     
-    @Scope(profil = "user")
+    @Scope(profil = "user",hierarchie = 11)
     @MethodAnnotation(url = "appelMoi")
     public ModelView callMe(){
         ModelView mv = new ModelView();
@@ -41,7 +42,7 @@ public class Emp {
         return mv;
     }
     
-    @Scope(profil = "")
+    @Scope(profil = "",hierarchie = 1)
     @MethodAnnotation(url = "callMe")
     public ModelView callMe2(){
         ModelView mv = new ModelView();
@@ -50,7 +51,7 @@ public class Emp {
         return mv;
     }
     
-    @Scope(profil = "admin")
+    @Scope(profil = "admin",hierarchie = 21)
     @MethodAnnotation(url = "empSave")
     public ModelView save(){
         ModelView mv = new ModelView();
