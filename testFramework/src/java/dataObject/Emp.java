@@ -106,7 +106,7 @@ public class Emp {
     public ModelView changeProfil(){
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
-        
+        mv.getSessionsToDelete().add("isConnected");
         return mv;
     }
  

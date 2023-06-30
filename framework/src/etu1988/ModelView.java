@@ -82,9 +82,4 @@ public class ModelView {
     public void addSessions(String key, Object value){
         sessions.put(key, value);
     }
-    
-    public void addSessionsToDelete(String key){
-    
-    }
-    
 }
