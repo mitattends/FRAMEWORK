@@ -298,6 +298,11 @@ public class FrontServlet extends HttpServlet {
         if (m.isAnnotationPresent(Scope.class)) {
             int hierarchieForMethod = m.getAnnotation(Scope.class).hierarchie();
             String sessionProfilName = (String) sessions.get("sessionValue");
+            // check si la fonction a besoin d'un identifiant
+            if (req.getSession().getAttribute(sessionProfilName) == null) {
+                throw new Exception("cette fonction requiert une connexion");
+            }
+            // fin du checking
             int userProfilHierarchie = (int) req.getSession().getAttribute(sessionProfilName);
             if (hierarchieForMethod > userProfilHierarchie) {
                 String exceptionMessage = "Cette méthode ne peut etre appellée par vous ";
@@ -314,11 +319,10 @@ public class FrontServlet extends HttpServlet {
         sessionToJson = gson.toJson(mv.getData());
         return sessionToJson;
     }
-
     // ---- fin sprint 13 ----
-
+    
     // ---- sprint 14 ----
-    public String changeToJson(Object ob) {
+    public String changeToJson(Object ob){
         String objectToJson = "test";
         Gson gson = new Gson();
         objectToJson = gson.toJson(ob);
@@ -391,39 +395,32 @@ public class FrontServlet extends HttpServlet {
             try {
                 classCalled = Class.forName(objectName);
                 classCalledInstance = AddInClassInstances(classCalled);
-                useSet(classCalledInstance, req); //get all the attributes and set them
-                // --------check pour la fonction trouvée----------
+                /*
+                    set tous les champs de la classe
+                 */
+                useSet(classCalledInstance, req);
+                /*
+                    check pour la fonction trouvee
+                 */
                 Method methodCalled = findMethod(req, classCalledInstance);
                 checkAuthorisation(methodCalled, req);
-                // --------fin du check--------------
+                /*
+                    fin du checking
+                 */
                 Object[] argsValues = findArgsValues(methodCalled, req);
-                ModelView modelView = new ModelView();
-
-                if (argsValues.length == 0) {
-                    modelView = (ModelView) methodCalled.invoke(classCalledInstance);
-                }
-
-                modelView = (ModelView) methodCalled.invoke(classCalledInstance, argsValues);
 
                 /*
-                    sprint 6
-                    remplissage des datas de modelView     
-                */
-            
-                if (modelView.getData() != null) {
-                    /*
-                        sprint 13
-                        changement des datas en Json
-                        le changement doit etre avant l'envoie des datas
-                     */
-                    if (modelView.getIsJson()) {
-                        System.out.println(changeToJson(modelView));
+                    pour les fonctions qui retournent un modelView
+                 */
+                if (methodCalled.getReturnType().equals(ModelView.class)) {
+                    ModelView modelView = new ModelView();
+                    if (argsValues.length == 0) {
+                        modelView = (ModelView) methodCalled.invoke(classCalledInstance);
+                    } else {
+                        modelView = (ModelView) methodCalled.invoke(classCalledInstance, argsValues);
                     }
-                    fillAttributes(modelView.getData(), req);
                     setModelView(modelView, req, resp);
                 } /*
-                    sprint 14
-                    changement des objets retournes en Json
                     pour les fonctions qui ne retournent pas de ModelView
                  */ else {
                     Object methodReturn = new Object();
@@ -433,18 +430,9 @@ public class FrontServlet extends HttpServlet {
                         methodReturn = methodCalled.invoke(classCalledInstance, argsValues);
                     }
                     PrintWriter out = resp.getWriter();
-                    out.print("<h2>" + changeToJson(methodReturn) + "</h2>");
+                    out.print("<h2>"+changeToJson(methodReturn)+"</h2>");
+                    
                 }
-
-                /*
-                    sprint 11
-                    remplissage des sessions de modelView
-                 */
-                if (!modelView.getSessions().isEmpty()) {
-                    fillSessions(req, modelView.getSessions());
-                }
-
-                req.getRequestDispatcher(modelView.getView()).forward(req, resp);
             } catch (Exception e) {
                 e.printStackTrace();
             }
