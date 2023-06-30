@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Date;
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletConfig;
@@ -365,7 +366,12 @@ public class FrontServlet extends HttpServlet {
         }
         /*
             sprint 15
+            partie 2 :
+            => supprimer des variables de sessions choisies
         */
+        if(modelView.getInvalidateSession() == false && !modelView.getSessionsToDelete().isEmpty()){
+            removeSession(req, modelView.getSessionsToDelete());
+        }
         //  renvoie vers la vue avec les donnees ou non
         req.getRequestDispatcher(modelView.getView()).forward(req, resp);
     }
@@ -376,6 +382,16 @@ public class FrontServlet extends HttpServlet {
     */
     public void removeSession(HttpServletRequest req){
         req.getSession().invalidate();
+    }
+    
+    /*
+        sprint 15
+        partie 2 : supprimer les sessions choisies
+    */
+    public void removeSession(HttpServletRequest req, List<String>sessionsToDelete){
+        for (String sessionToDelete : sessionsToDelete) {
+            req.removeAttribute(sessionToDelete);
+        }
     }
 
     /*

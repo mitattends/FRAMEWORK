@@ -95,10 +95,18 @@ public class Emp {
         return emps;
     }
 
+    @MethodAnnotation(url = "log-out")
     public ModelView logOut(){
         ModelView mv = new ModelView();
         mv.setInvalidateSession(true);
         mv.setView("formEmp.jsp");
+        return mv;
+    }
+    
+    public ModelView changeProfil(){
+        ModelView mv = new ModelView();
+        mv.setView("formEmp.jsp");
+        
         return mv;
     }
  
