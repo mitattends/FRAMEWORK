@@ -35,6 +35,7 @@ public class Emp {
     @MethodAnnotation(url = "appelMoi")
     public ModelView callMe(){
         ModelView mv = new ModelView();
+        mv.setIsJson(true);
         mv.setView("testView.jsp");
         Emp[]emps = {new Emp("Jean"), new Emp("Jeanne")};
         mv.addItem("empList", emps);

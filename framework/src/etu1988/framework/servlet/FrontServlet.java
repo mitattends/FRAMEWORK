@@ -4,6 +4,7 @@
  */
 package etu1988.framework.servlet;
 
+import com.google.gson.Gson;
 import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.Mapping;
@@ -260,7 +261,6 @@ public class FrontServlet extends HttpServlet {
                 if ((!Collections.list(req.getParameterNames()).isEmpty() || Collections.list(req.getParameterNames()).isEmpty()) && modelMethod.getParameterCount() == 0) {
                     return modelMethod;
                 }
-
             }
         }
         throw new Exception("Methode introuvable");
@@ -293,20 +293,30 @@ public class FrontServlet extends HttpServlet {
             }
         }
     }
-    
-    public void checkAuthorisation(Method m, HttpServletRequest req) throws Exception{
-        if(m.isAnnotationPresent(Scope.class)){
+
+    public void checkAuthorisation(Method m, HttpServletRequest req) throws Exception {
+        if (m.isAnnotationPresent(Scope.class)) {
             int hierarchieForMethod = m.getAnnotation(Scope.class).hierarchie();
             String sessionProfilName = (String) sessions.get("sessionValue");
             int userProfilHierarchie = (int) req.getSession().getAttribute(sessionProfilName);
-            if(hierarchieForMethod > userProfilHierarchie){
+            if (hierarchieForMethod > userProfilHierarchie) {
                 String exceptionMessage = "Cette méthode ne peut etre appellée par vous ";
-                String exceptionExplanation = "vous : "+userProfilHierarchie+" --- la fonction requiert : "+ hierarchieForMethod;
+                String exceptionExplanation = "vous : " + userProfilHierarchie + " --- la fonction requiert : " + hierarchieForMethod;
                 throw new Exception(exceptionMessage + "------" + exceptionExplanation);
             }
         }
     }
 
+    // ----- sprint 13 -------
+    public String changeToJson(ModelView mv) {
+        String sessionToJson = "test";
+        Gson gson = new Gson();
+        sessionToJson = gson.toJson(mv.getData());
+        return sessionToJson;
+    }
+
+    // ---- fin sprint 13 ----
+    
     /*
         Fonction a appeler pour le demarrage 
         de la servlet
@@ -328,6 +338,7 @@ public class FrontServlet extends HttpServlet {
                 String initParameterValue = (String) getInitParameter(initParamaterName);
                 sessions.put(initParamaterName, initParameterValue);
             }
+            // ------------- fin de remplissage de sessions ----------
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -356,10 +367,27 @@ public class FrontServlet extends HttpServlet {
 
                 modelView = (ModelView) methodCalled.invoke(classCalledInstance, argsValues);
 
+                /*
+                    sprint 6
+                    remplissage des datas de modelView     
+                */
+            
                 if (modelView.getData() != null) {
+                    /*
+                        sprint 13
+                        changement des datas en Json
+                        le changement doit etre avant l'envoie des datas
+                     */
+                    if (modelView.getIsJson()) {
+                        System.out.println(changeToJson(modelView));
+                    }
                     fillAttributes(modelView.getData(), req);
                 }
 
+                /*
+                    sprint 11
+                    remplissage des sessions de modelView
+                 */
                 if (!modelView.getSessions().isEmpty()) {
                     fillSessions(req, modelView.getSessions());
                 }
