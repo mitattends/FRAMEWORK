@@ -316,7 +316,45 @@ public class FrontServlet extends HttpServlet {
     }
 
     // ---- fin sprint 13 ----
-    
+
+    // ---- sprint 14 ----
+    public String changeToJson(Object ob) {
+        String objectToJson = "test";
+        Gson gson = new Gson();
+        objectToJson = gson.toJson(ob);
+        return objectToJson;
+    }
+
+    public void setModelView(ModelView modelView, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        /*
+            sprint 6
+            remplissage des datas de modelView     
+         */
+        if (modelView.getData() != null) {
+            /*
+                sprint 13
+                changement des datas en Json
+             */
+            if (modelView.getIsJson()) {
+                System.out.println(changeToJson(modelView));
+            }
+            /*
+                sprint 6
+                remplissage des attribute de la servlet
+             */
+            fillAttributes(modelView.getData(), req);
+        }
+        /*
+            sprint 11
+            remplissage des sessions de modelView
+         */
+        if (!modelView.getSessions().isEmpty()) {
+            fillSessions(req, modelView.getSessions());
+        }
+        //  renvoie vers la vue avec les donnees ou non
+        req.getRequestDispatcher(modelView.getView()).forward(req, resp);
+    }
+
     /*
         Fonction a appeler pour le demarrage 
         de la servlet
@@ -382,6 +420,20 @@ public class FrontServlet extends HttpServlet {
                         System.out.println(changeToJson(modelView));
                     }
                     fillAttributes(modelView.getData(), req);
+                    setModelView(modelView, req, resp);
+                } /*
+                    sprint 14
+                    changement des objets retournes en Json
+                    pour les fonctions qui ne retournent pas de ModelView
+                 */ else {
+                    Object methodReturn = new Object();
+                    if (argsValues.length == 0) {
+                        methodReturn = methodCalled.invoke(classCalledInstance);
+                    } else {
+                        methodReturn = methodCalled.invoke(classCalledInstance, argsValues);
+                    }
+                    PrintWriter out = resp.getWriter();
+                    out.print("<h2>" + changeToJson(methodReturn) + "</h2>");
                 }
 
                 /*

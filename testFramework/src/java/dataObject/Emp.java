@@ -88,5 +88,14 @@ public class Emp {
     }
     
     
+    // sprint 14
+    @MethodAnnotation(url = "show-me")
+    public Emp[] showEmps(){
+        Emp[] emps = new Emp[2];
+        emps[0] = new Emp("kuku");
+        emps[1] = new Emp("Kevin");
+        return emps;
+    }
+
     
 }
