@@ -355,8 +355,27 @@ public class FrontServlet extends HttpServlet {
         if (!modelView.getSessions().isEmpty()) {
             fillSessions(req, modelView.getSessions());
         }
+        /*
+            sprint 15
+            partie 1 :
+            => supprimer la session actuelle = l'invalider
+        */
+        if(modelView.getInvalidateSession() == true){
+            removeSession(req);
+        }
+        /*
+            sprint 15
+        */
         //  renvoie vers la vue avec les donnees ou non
         req.getRequestDispatcher(modelView.getView()).forward(req, resp);
+    }
+    
+    /*
+        sprint 15
+        partie 1 : supprimer toutes les sessions
+    */
+    public void removeSession(HttpServletRequest req){
+        req.getSession().invalidate();
     }
 
     /*
@@ -431,7 +450,6 @@ public class FrontServlet extends HttpServlet {
                     }
                     PrintWriter out = resp.getWriter();
                     out.print("<h2>"+changeToJson(methodReturn)+"</h2>");
-                    
                 }
             } catch (Exception e) {
                 e.printStackTrace();

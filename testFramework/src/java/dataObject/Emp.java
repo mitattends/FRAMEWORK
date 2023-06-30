@@ -93,6 +93,13 @@ public class Emp {
         emps[0] = new Emp("kuku");
         emps[1] = new Emp("Kevin");
         return emps;
-    }    
+    }
+
+    public ModelView logOut(){
+        ModelView mv = new ModelView();
+        mv.setInvalidateSession(true);
+        mv.setView("formEmp.jsp");
+        return mv;
+    }
  
 }
