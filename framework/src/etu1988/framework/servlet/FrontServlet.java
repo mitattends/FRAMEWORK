@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Date;
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletConfig;
@@ -355,8 +356,42 @@ public class FrontServlet extends HttpServlet {
         if (!modelView.getSessions().isEmpty()) {
             fillSessions(req, modelView.getSessions());
         }
+        /*
+            sprint 15
+            partie 1 :
+            => supprimer la session actuelle = l'invalider
+        */
+        if(modelView.getInvalidateSession() == true){
+            removeSession(req);
+        }
+        /*
+            sprint 15
+            partie 2 :
+            => supprimer des variables de sessions choisies
+        */
+        if(modelView.getInvalidateSession() == false && !modelView.getSessionsToDelete().isEmpty()){
+            removeSession(req, modelView.getSessionsToDelete());
+        }
         //  renvoie vers la vue avec les donnees ou non
         req.getRequestDispatcher(modelView.getView()).forward(req, resp);
+    }
+    
+    /*
+        sprint 15
+        partie 1 : supprimer toutes les sessions
+    */
+    public void removeSession(HttpServletRequest req){
+        req.getSession().invalidate();
+    }
+    
+    /*
+        sprint 15
+        partie 2 : supprimer les sessions choisies
+    */
+    public void removeSession(HttpServletRequest req, List<String>sessionsToDelete){
+        for (String sessionToDelete : sessionsToDelete) {
+            req.removeAttribute(sessionToDelete);
+        }
     }
 
     /*
@@ -431,7 +466,6 @@ public class FrontServlet extends HttpServlet {
                     }
                     PrintWriter out = resp.getWriter();
                     out.print("<h2>"+changeToJson(methodReturn)+"</h2>");
-                    
                 }
             } catch (Exception e) {
                 e.printStackTrace();

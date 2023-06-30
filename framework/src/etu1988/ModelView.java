@@ -4,7 +4,9 @@
  */
 package etu1988;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -15,9 +17,19 @@ public class ModelView {
     HashMap<String, Object> data ;
     HashMap<String, Object> sessions;
     boolean isJson = false;
-
+    boolean invalidateSession = false;
+    List<String> sessionsToDelete;
+    
     public HashMap<String, Object> getSessions() {
         return sessions;
+    }
+
+    public List<String> getSessionsToDelete() {
+        return sessionsToDelete;
+    }
+
+    public void setSessionsToDelete(List<String> sessionsToDelete) {
+        this.sessionsToDelete = sessionsToDelete;
     }
 
     public void setSessions(HashMap<String, Object> sessions) {
@@ -51,6 +63,16 @@ public class ModelView {
     public ModelView(){
         data = new HashMap<>();
         sessions = new HashMap<>();
+        sessionsToDelete = new ArrayList<>();
+    }
+
+    // sprint 15
+    public boolean getInvalidateSession() {
+        return invalidateSession;
+    }
+
+    public void setInvalidateSession(boolean invalidateSession) {
+        this.invalidateSession = invalidateSession;
     }
     
     public void addItem(String key, Object value){

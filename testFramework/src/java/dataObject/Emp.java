@@ -93,6 +93,21 @@ public class Emp {
         emps[0] = new Emp("kuku");
         emps[1] = new Emp("Kevin");
         return emps;
-    }    
+    }
+
+    @MethodAnnotation(url = "log-out")
+    public ModelView logOut(){
+        ModelView mv = new ModelView();
+        mv.setInvalidateSession(true);
+        mv.setView("formEmp.jsp");
+        return mv;
+    }
+    
+    public ModelView changeProfil(){
+        ModelView mv = new ModelView();
+        mv.setView("formEmp.jsp");
+        mv.getSessionsToDelete().add("isConnected");
+        return mv;
+    }
  
 }
