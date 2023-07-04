@@ -34,7 +34,7 @@ public class Login {
     @MethodAnnotation(url = "login")
     public ModelView login(){
         ModelView mv = new ModelView();
-        mv.setView("formEmp.jsp");
+        mv.setView("formArray.jsp");
         if(getUserName().equals("Mitantsoa") && getPassword().equals("123")){
             mv.addSessions("isConnected", true);
             mv.addSessions("profil",21);

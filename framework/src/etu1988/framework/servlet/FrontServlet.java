@@ -13,6 +13,7 @@ import etu1988.framework.myAnnotation.Scope;
 import etu1988.framework.myAnnotation.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -28,11 +29,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Date;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.GenericServlet;
-import javax.servlet.ServletConfig;
+import javax.servlet.http.Part;
 
 /**
  *
@@ -76,6 +78,14 @@ public class FrontServlet extends HttpServlet {
 
     public void setSessions() {
         this.sessions = new HashMap<>();
+    }
+
+    public Vector<FileUpload> getFileUploads() {
+        return fileUploads;
+    }
+
+    public void setFileUploads() {
+        this.fileUploads = new Vector<>();
     }
 
     public String formatFilePath(File file) {
@@ -124,17 +134,18 @@ public class FrontServlet extends HttpServlet {
         String strCapitalized = mot.substring(0, 1).toUpperCase() + mot.substring(1);
         return strCapitalized;
     }
+    
 
-    public void useSet(Object object, HttpServletRequest req) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        Enumeration<String> attributeNames = req.getParameterNames();
-        while (attributeNames.hasMoreElements()) {
-            String attributeName = attributeNames.nextElement();
-            Field field = null;
-            try {
-                field = object.getClass().getDeclaredField(attributeName);
-            } catch (NoSuchFieldException e) {
-                continue;
-            }
+    public void useSet(Object object, HttpServletRequest req) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException, ServletException {
+//        Enumeration<String> attributeNames = req.getParameterNames();
+        Field[]fields = object.getClass().getDeclaredFields();
+        for(Field field : fields) {
+            String attributeName = field.getName();
+//            try {
+//                field = object.getClass().getDeclaredField(attributeName);
+//            } catch (NoSuchFieldException e) {
+//                continue;
+//            }
             String attributeValue = req.getParameter(attributeName);
             String methodName = "set" + makeFirstCharUp(attributeName);
             Class fieldType = field.getType();
@@ -159,6 +170,12 @@ public class FrontServlet extends HttpServlet {
                 Date attribute = Date.valueOf(attributeValue);
                 setMethod.invoke(object, attribute);
             }
+            if (field.getType().equals(FileUpload.class)) {
+                System.out.println("huhuuuuu");
+                getFileByInput(req, field);
+//                setMethod.invoke(object, attributeValue);
+            }
+            int x = 0;
         }
     }
 
@@ -321,9 +338,9 @@ public class FrontServlet extends HttpServlet {
         return sessionToJson;
     }
     // ---- fin sprint 13 ----
-    
+
     // ---- sprint 14 ----
-    public String changeToJson(Object ob){
+    public String changeToJson(Object ob) {
         String objectToJson = "test";
         Gson gson = new Gson();
         objectToJson = gson.toJson(ob);
@@ -360,39 +377,58 @@ public class FrontServlet extends HttpServlet {
             sprint 15
             partie 1 :
             => supprimer la session actuelle = l'invalider
-        */
-        if(modelView.getInvalidateSession() == true){
+         */
+        if (modelView.getInvalidateSession() == true) {
             removeSession(req);
         }
         /*
             sprint 15
             partie 2 :
             => supprimer des variables de sessions choisies
-        */
-        if(modelView.getInvalidateSession() == false && !modelView.getSessionsToDelete().isEmpty()){
+         */
+        if (modelView.getInvalidateSession() == false && !modelView.getSessionsToDelete().isEmpty()) {
             removeSession(req, modelView.getSessionsToDelete());
         }
         //  renvoie vers la vue avec les donnees ou non
         req.getRequestDispatcher(modelView.getView()).forward(req, resp);
     }
-    
+
     /*
         sprint 15
         partie 1 : supprimer toutes les sessions
-    */
-    public void removeSession(HttpServletRequest req){
+     */
+    public void removeSession(HttpServletRequest req) {
         req.getSession().invalidate();
     }
-    
+
     /*
         sprint 15
         partie 2 : supprimer les sessions choisies
-    */
-    public void removeSession(HttpServletRequest req, List<String>sessionsToDelete){
+     */
+    public void removeSession(HttpServletRequest req, List<String> sessionsToDelete) {
         for (String sessionToDelete : sessionsToDelete) {
             req.removeAttribute(sessionToDelete);
         }
     }
+
+    /*
+        sprint 9
+        prendre un fichier uploade
+     */
+    public void getFileByInput(HttpServletRequest req, Field field) throws IOException, ServletException {
+        Part part = null;
+        part = req.getPart(field.getName());
+        if (part != null) {
+            InputStream inputStream = part.getInputStream();
+            byte[] fileBytes = inputStream.readAllBytes();
+            inputStream.close();
+            String path = part.getSubmittedFileName();
+            FileUpload fu = new FileUpload(path, fileBytes);
+            System.out.println(Arrays.toString(fu.getBytes()) + "===" + fu.getName());
+            fileUploads.add(fu);
+        }
+    }
+
 
     /*
         Fonction a appeler pour le demarrage 
@@ -403,6 +439,7 @@ public class FrontServlet extends HttpServlet {
         setMappingUrl();
         setClasseInstances();
         setSessions();
+        setFileUploads();
         try {
             fillMappingUrl(new File(Thread.currentThread().getContextClassLoader().getResource(".").getPath()));
             /*
@@ -421,8 +458,12 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
-    public void executeAction(HttpServletRequest req, HttpServletResponse resp) {
+    public void executeAction(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         if (!req.getServletPath().equals("/")) {
+            /*
+                voir si l'input est un fichier
+                sprint 9
+             */
             Mapping mappingUsed = findMapping(req);
             String objectName = mappingUsed.getClassName();
             Class classCalled = null;
@@ -465,7 +506,7 @@ public class FrontServlet extends HttpServlet {
                         methodReturn = methodCalled.invoke(classCalledInstance, argsValues);
                     }
                     PrintWriter out = resp.getWriter();
-                    out.print("<h2>"+changeToJson(methodReturn)+"</h2>");
+                    out.print("<h2>" + changeToJson(methodReturn) + "</h2>");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -506,15 +547,5 @@ public class FrontServlet extends HttpServlet {
             throws ServletException, IOException {
         processRequest(request, response);
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
 
 }

@@ -5,6 +5,7 @@
 
 package dataObject;
 
+import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.myAnnotation.MethodAnnotation;
 import etu1988.framework.myAnnotation.Scope;
@@ -16,6 +17,7 @@ import java.util.HashMap;
  */
 public class Emp {
     String nom;
+    FileUpload fu;
 
     public void setNom(String nom) {
         this.nom = nom;
@@ -27,6 +29,14 @@ public class Emp {
     
     public Emp(String nom){
         setNom(nom);
+    }
+
+    public FileUpload getFu() {
+        return fu;
+    }
+
+    public void setFu(FileUpload fu) {
+        this.fu = fu;
     }
     
     public Emp(){}
@@ -107,6 +117,13 @@ public class Emp {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
         mv.getSessionsToDelete().add("isConnected");
+        return mv;
+    }
+    
+    @MethodAnnotation(url = "huhu")
+    public ModelView testFile(){
+        ModelView mv = new ModelView();
+        mv.setView("formEmp.jsp");
         return mv;
     }
  

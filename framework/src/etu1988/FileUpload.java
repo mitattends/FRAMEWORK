@@ -19,9 +19,18 @@ public class FileUpload {
     public void setBytes(byte[] bytes) {
         this.bytes = bytes;
     }
+     public String getName() {
+        return name;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
     
     public FileUpload(String name, byte [] bytes){
         setName(name);
         setBytes(bytes);
     }
+
+   
 }

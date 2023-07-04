@@ -13,8 +13,9 @@
     </head>
     <body>
         <h1>Hello World!</h1>
-        <form method="post" action = "empSave">
+        <form method="post" action = "huhu" enctype="multipart/form-data">
             <input type="text" name="nom" placeholder="nom">
+            <input type="file" name="fu">
             <input type="submit" value="valider"> 
         </form>
     </body>
