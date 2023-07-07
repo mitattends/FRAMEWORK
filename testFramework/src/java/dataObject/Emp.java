@@ -2,20 +2,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 package dataObject;
 
 import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.myAnnotation.MethodAnnotation;
 import etu1988.framework.myAnnotation.Scope;
-import java.util.HashMap;
 
 /**
  *
  * @author mita
  */
 public class Emp {
+
     String nom;
     FileUpload fu;
 
@@ -25,9 +24,9 @@ public class Emp {
 
     public String getNom() {
         return nom;
-    }   
-    
-    public Emp(String nom){
+    }
+
+    public Emp(String nom) {
         setNom(nom);
     }
 
@@ -38,67 +37,68 @@ public class Emp {
     public void setFu(FileUpload fu) {
         this.fu = fu;
     }
-    
-    public Emp(){}
-    
-    @Scope(profil = "user",hierarchie = 11)
+
+    public Emp() {
+    }
+
+    @Scope(profil = "user", hierarchie = 11)
     @MethodAnnotation(url = "appelMoi")
-    public ModelView callMe(){
+    public ModelView callMe() {
         ModelView mv = new ModelView();
         mv.setIsJson(true);
         mv.setView("testView.jsp");
-        Emp[]emps = {new Emp("Jean"), new Emp("Jeanne")};
+        Emp[] emps = {new Emp("Jean"), new Emp("Jeanne")};
         mv.addItem("empList", emps);
         System.out.println("vous etes un utilisateur normal");
         return mv;
     }
-    
-    @Scope(profil = "",hierarchie = 1)
+
+    @Scope(profil = "", hierarchie = 1)
     @MethodAnnotation(url = "callMe")
-    public ModelView callMe2(){
+    public ModelView callMe2() {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
         System.out.println("vous etes un visiteur");
         return mv;
     }
-    
-    @Scope(profil = "admin",hierarchie = 21)
+
+    @Scope(profil = "admin", hierarchie = 21)
     @MethodAnnotation(url = "empSave")
-    public ModelView save(){
+    public ModelView save() {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
         System.out.println("vous etes admin");
         return mv;
     }
-    
+
     @MethodAnnotation(url = "empSave")
-    public ModelView save(int id){
+    public ModelView save(int id) {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
-        System.out.println("id "+id);
+        System.out.println("id " + id);
         return mv;
     }
-    
+
     @MethodAnnotation(url = "empSave")
-    public ModelView save(String nom){
+    public ModelView save(String nom) {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
-        System.out.println("nom+++"+nom);
+        System.out.println("nom+++" + nom);
         return mv;
     }
-    
+
     @MethodAnnotation(url = "showArray")
-    public ModelView show(int[]noms){
+    public ModelView show(int[] noms) {
         ModelView mv = new ModelView();
         mv.setView("formArray.jsp");
-        for(int nom : noms){
+        for (int nom : noms) {
             System.out.println(nom);
         }
         return mv;
     }
-    
+
     @MethodAnnotation(url = "show-me")
-    public Emp[] showEmps(){
+    public Emp[] showEmps() {
         Emp[] emps = new Emp[2];
         emps[0] = new Emp("kuku");
         emps[1] = new Emp("Kevin");
@@ -106,25 +106,26 @@ public class Emp {
     }
 
     @MethodAnnotation(url = "log-out")
-    public ModelView logOut(){
+    public ModelView logOut() {
         ModelView mv = new ModelView();
         mv.setInvalidateSession(true);
         mv.setView("formEmp.jsp");
         return mv;
     }
-    
-    public ModelView changeProfil(){
+
+    @MethodAnnotation(url = "hehe")
+    public ModelView changeProfil() {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
         mv.getSessionsToDelete().add("isConnected");
         return mv;
     }
+
     
-    @MethodAnnotation(url = "huhu")
-    public ModelView testFile(){
+    public ModelView testFile() {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
         return mv;
     }
- 
+
 }

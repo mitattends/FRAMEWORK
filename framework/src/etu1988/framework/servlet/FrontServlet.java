@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
-import javax.servlet.GenericServlet;
 import javax.servlet.http.Part;
 
 /**
@@ -134,12 +133,11 @@ public class FrontServlet extends HttpServlet {
         String strCapitalized = mot.substring(0, 1).toUpperCase() + mot.substring(1);
         return strCapitalized;
     }
-    
 
     public void useSet(Object object, HttpServletRequest req) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException, ServletException {
 //        Enumeration<String> attributeNames = req.getParameterNames();
-        Field[]fields = object.getClass().getDeclaredFields();
-        for(Field field : fields) {
+        Field[] fields = object.getClass().getDeclaredFields();
+        for (Field field : fields) {
             String attributeName = field.getName();
 //            try {
 //                field = object.getClass().getDeclaredField(attributeName);
@@ -171,11 +169,15 @@ public class FrontServlet extends HttpServlet {
                 setMethod.invoke(object, attribute);
             }
             if (field.getType().equals(FileUpload.class)) {
-                System.out.println("huhuuuuu");
-                getFileByInput(req, field);
+                String contentType = req.getContentType();
+                if (contentType != null) {
+                    if (contentType.contains("multipart/form-data") || contentType.contains("multipart/form-mixed")) {
+                        System.out.println("huhuuuuu");
+                        getFileByInput(req, field);
+                    }
+                }
 //                setMethod.invoke(object, attributeValue);
             }
-            int x = 0;
         }
     }
 
@@ -407,7 +409,9 @@ public class FrontServlet extends HttpServlet {
      */
     public void removeSession(HttpServletRequest req, List<String> sessionsToDelete) {
         for (String sessionToDelete : sessionsToDelete) {
-            req.removeAttribute(sessionToDelete);
+            req.getSession().removeAttribute(sessionToDelete);
+            Object sessionDeleted = req.getSession().getAttribute(sessionToDelete);
+            int x = 0;
         }
     }
 
@@ -428,7 +432,6 @@ public class FrontServlet extends HttpServlet {
             fileUploads.add(fu);
         }
     }
-
 
     /*
         Fonction a appeler pour le demarrage 
@@ -460,10 +463,6 @@ public class FrontServlet extends HttpServlet {
 
     public void executeAction(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         if (!req.getServletPath().equals("/")) {
-            /*
-                voir si l'input est un fichier
-                sprint 9
-             */
             Mapping mappingUsed = findMapping(req);
             String objectName = mappingUsed.getClassName();
             Class classCalled = null;
