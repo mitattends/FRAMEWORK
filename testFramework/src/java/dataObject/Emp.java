@@ -8,6 +8,11 @@ import etu1988.FileUpload;
 import etu1988.ModelView;
 import etu1988.framework.myAnnotation.MethodAnnotation;
 import etu1988.framework.myAnnotation.Scope;
+<<<<<<< Updated upstream
+=======
+import etu1988.framework.myAnnotation.Session;
+import java.util.HashMap;
+>>>>>>> Stashed changes
 
 /**
  *
@@ -16,7 +21,11 @@ import etu1988.framework.myAnnotation.Scope;
 public class Emp {
 
     String nom;
+<<<<<<< Updated upstream
     FileUpload fu;
+=======
+    
+>>>>>>> Stashed changes
 
     public void setNom(String nom) {
         this.nom = nom;
@@ -122,10 +131,22 @@ public class Emp {
     }
 
     
+<<<<<<< Updated upstream
     public ModelView testFile() {
         ModelView mv = new ModelView();
         mv.setView("formEmp.jsp");
         return mv;
     }
 
+=======
+    @Session
+    @MethodAnnotation(url = "showSessions")
+    public ModelView showSessions(){
+        ModelView modelView = new ModelView();
+        return modelView;
+    }
+    
+    
+    
+>>>>>>> Stashed changes
 }
